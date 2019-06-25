@@ -1,0 +1,10 @@
+---
+#Azure information
+azure_environment: "{{ lookup('env','ENVIRONMENT') | trim }}"
+azure_resource_group: "leval1-{{ lookup('env','ENVIRONMENT') | trim | lower }}"
+azure_location: East US
+azure_client_id: "{{ lookup('env','AZURE_CLIENT_ID') | trim }}"
+azure_client_secret: "{{ lookup('env','AZURE_SECRET') | trim }}"
+azure_subscription_id: "{{ lookup('env','AZURE_SUBSCRIPTION_ID') | trim }}"
+azure_tenant: "{{ lookup('env','AZURE_TENANT') | trim }}"
+azure_subnet_address_range: "{{ lookup('env','AZURE_SUBNET_ADDRESS_RANGE') | trim }}"

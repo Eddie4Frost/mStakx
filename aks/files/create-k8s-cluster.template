@@ -1,0 +1,51 @@
+#!/bin/bash
+
+declare subscriptionId="{{ azure_subscription_id }}"
+declare clientId="{{ azure_client_id }}"
+declare secret="{{ azure_client_secret }}"
+declare tenantId="{{ azure_tenant }}"
+declare resourceGroupName="{{ azure_resource_group }}"
+declare vnetResourceGroupName="rg-leval1"
+declare location="{{ azure_location }}"
+declare environment="{{ azure_environment }}"
+declare clusterName="k8s-{{ lookup('env','ENVIRONMENT') | trim | lower }}-leval1"
+declare vnetName="level1-vnet"
+declare vnetAddress="10.100.0.0/24"
+declare subnetName="level1-{{ lookup('env','ENVIRONMENT') | trim | lower }}-k8s-subnet"
+declare subnetAddress="{{ azure_subnet_address_range }}"
+declare k8sServiceSubnetAddress="10.0.0.0/16"
+declare k8sVersion="1.13.5"
+
+#define a subscription
+az account set --subscription $subscriptionId
+
+# log with principal account
+az login --service-principal --username $clientId --password $secret --tenant $tenantId
+
+# create the resource group
+az group create --name $resourceGroupName --location "$location" --tags Environment={{ azure_environment }}
+
+subnetId=$(az network vnet subnet show\
+	--name $subnetName\
+  --resource-group $vnetResourceGroupName\
+  --vnet-name $vnetName\
+  --query id\
+  -o tsv)
+
+#echo $subnetId
+
+# cria cluster se não existir
+az aks create \
+  --resource-group $resourceGroupName\
+  --name $clusterName\
+  --network-plugin azure\
+  --vnet-subnet-id $subnetId\
+  --service-cidr $k8sServiceSubnetAddress\
+  --service-principal $clientId\
+  --client-secret $secret\
+	--kubernetes-version 1.13.5\
+	--node-count 3\
+	--disable-rbac\
+	--generate-ssh-keys\
+	--node-vm-size Standard_D4s_v3\
+	--tags Environment={{ azure_environment }}

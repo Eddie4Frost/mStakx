@@ -1,0 +1,12 @@
+- name: Delete a managed Azure Container Services (AKS) cluster
+  hosts: localhost
+  connection: local
+  vars:
+    resource_group: "{{ azure_resource_group }}"
+    aks_name: "k8s-{{ lookup('env','ENVIRONMENT') | trim | lower }}-level1"
+  tasks:
+  - name:
+    azure_rm_aks:
+      name: "{{ aks_name }}"
+      resource_group: "{{ resource_group }}"
+      state: absent

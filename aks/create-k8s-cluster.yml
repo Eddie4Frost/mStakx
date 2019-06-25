@@ -1,0 +1,36 @@
+- name: Create Azure Kubernetes Service
+  hosts: localhost
+  connection: local
+  vars:
+    resource_group: RG-{{ lookup('env','ENVIRONMENT') }}-leval1
+    location: East US
+    aks_name: "AKS-{{ lookup('env','ENVIRONMENT') }}-Cluster"
+    username: azureuser
+    ssh_key: "{{ lookup('env','SSH_KEY') }}"
+    client_id: "{{ lookup('env','AZURE_CLIENT_ID') }}"
+    client_secret: "{{ lookup('env','AZURE_SECRET') }}"
+
+  tasks:
+
+  - debug:
+      msg: "resource_group {{ resource_group }}"
+  - debug:
+      msg: "location {{ azure_location }}"
+  - debug:
+      msg: "ssh_key {{ ssh_key }}"
+  - debug:
+      msg: "client_id {{ client_id }}"
+
+  - name: Create resource group
+    azure_rm_resourcegroup:
+      name: "{{ resource_group }}"
+      location: "{{ location }}"
+
+  - name: Generate a script to create AKS clusterName
+    template:
+      src: files/create-k8s-cluster.template
+      dest: files/create-k8s-cluster.sh
+      mode: "u=rx,g=rx,o=rx"
+
+  - name: Create a managed Azure Container Services (AKS) cluster
+    script: files/create-k8s-cluster.sh
